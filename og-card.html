@@ -1,0 +1,97 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@800;900&family=Major+Mono+Display&family=VT323&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1200px;height:630px;overflow:hidden;background:#000;font-family:'VT323',monospace}
+  .card{
+    position:relative;width:1200px;height:630px;overflow:hidden;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 25%, rgba(157,0,255,0.45), transparent 70%),
+      radial-gradient(ellipse 110% 60% at 50% 100%, rgba(255,42,109,0.35), transparent 60%),
+      linear-gradient(180deg,#04001a 0%,#0a0024 50%,#1a0033 100%);
+  }
+  .sun{
+    position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+    width:380px;height:380px;border-radius:50%;
+    background:linear-gradient(180deg,#fffb00 0%,#ff2a6d 50%,#9d00ff 100%);
+    box-shadow:0 0 90px rgba(255,42,109,0.6),0 0 160px rgba(157,0,255,0.5),inset 0 -40px 90px rgba(0,0,0,0.4);
+    filter:saturate(1.2);opacity:0.9;
+  }
+  .sun::after{
+    content:"";position:absolute;inset:0;border-radius:50%;
+    background:repeating-linear-gradient(0deg,transparent 0 18px,#0a0024 18px 22px);
+    -webkit-mask:linear-gradient(180deg,transparent 50%,#000 50%);
+    mask:linear-gradient(180deg,transparent 50%,#000 50%);
+  }
+  .grid{
+    position:absolute;left:50%;bottom:-50px;transform:translateX(-50%) perspective(700px) rotateX(72deg);
+    width:240vw;height:90vh;transform-origin:50% 0;
+    background:
+      linear-gradient(rgba(157,0,255,0.6) 2px,transparent 2px) 0 0/100% 44px,
+      linear-gradient(90deg,rgba(5,217,232,0.4) 2px,transparent 2px) 0 0/44px 100%;
+  }
+  .crt{
+    position:absolute;inset:0;pointer-events:none;
+    background:
+      repeating-linear-gradient(0deg,rgba(0,0,0,0.18) 0 1px,transparent 1px 3px),
+      radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.6) 100%);
+    mix-blend-mode:multiply;
+  }
+  .content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:5}
+  .kicker{
+    font-family:'Major Mono Display',monospace;
+    color:#05d9e8;font-size:28px;letter-spacing:0.55em;
+    padding:8px 22px;border:2px solid #05d9e8;
+    box-shadow:0 0 18px rgba(5,217,232,0.6),inset 0 0 18px rgba(5,217,232,0.2);
+    text-shadow:0 0 14px #05d9e8;margin-bottom:30px;
+  }
+  h1{
+    font-family:'Orbitron',sans-serif;font-weight:900;
+    font-size:200px;letter-spacing:0.06em;line-height:0.85;color:#fff;
+    text-shadow:0 0 12px #fff,0 0 32px #05d9e8,0 0 54px #ff2a6d,0 0 100px #9d00ff;
+    position:relative;
+  }
+  h1::before,h1::after{
+    content:attr(data-text);position:absolute;left:0;top:0;width:100%;
+    pointer-events:none;
+  }
+  h1::before{color:#ff2a6d;transform:translate(-5px,1px);mix-blend-mode:screen;opacity:0.9}
+  h1::after {color:#05d9e8;transform:translate( 5px,-1px);mix-blend-mode:screen;opacity:0.9}
+  .sub{
+    margin-top:24px;color:#ff61c7;font-size:36px;letter-spacing:0.45em;
+    text-shadow:0 0 18px #ff61c7;font-family:'Orbitron',sans-serif;font-weight:800;
+  }
+  .games{
+    margin-top:38px;color:#fffb00;font-size:24px;letter-spacing:0.35em;
+    text-shadow:0 0 12px #fffb00;font-family:'Major Mono Display',monospace;
+  }
+  .games span{margin:0 22px}
+  .domain{
+    position:absolute;left:0;right:0;bottom:30px;text-align:center;
+    color:#05d9e8;font-family:'Major Mono Display',monospace;
+    letter-spacing:0.6em;font-size:22px;text-shadow:0 0 10px #05d9e8;z-index:6;
+  }
+  .corner-tl,.corner-br{
+    position:absolute;width:36px;height:36px;z-index:6;
+  }
+  .corner-tl{top:30px;left:30px;border-left:3px solid #ff2a6d;border-top:3px solid #ff2a6d;box-shadow:0 0 12px #ff2a6d}
+  .corner-br{bottom:30px;right:30px;border-right:3px solid #05d9e8;border-bottom:3px solid #05d9e8;box-shadow:0 0 12px #05d9e8}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="grid"></div>
+  <div class="sun"></div>
+  <div class="crt"></div>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div class="content">
+    <div class="kicker">EST · 2026</div>
+    <h1 data-text="FEJOH">FEJOH</h1>
+    <div class="sub">GAMES BY FELIX</div>
+    <div class="games"><span>· BING BANG ·</span><span>· PEW PEW ·</span><span>· TULTON ·</span></div>
+  </div>
+  <div class="domain">// FEJOH.COM //</div>
+</div>
+</body></html>
