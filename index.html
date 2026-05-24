@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FEJOH · GAMES BY FELIX</title>
+<meta name="description" content="A catalog of games made by Felix. Multiplayer arenas, tactical sims, and more.">
+<meta property="og:title" content="FEJOH — Games by Felix">
+<meta property="og:description" content="Multiplayer arena shooters and tactical sims, built by Felix.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://fejoh.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=VT323&family=Major+Mono+Display&display=swap" rel="stylesheet">
+<style>
+  /* ────────────────────────────────────────────────────────────────────
+     PALETTE
+  ──────────────────────────────────────────────────────────────────── */
+  :root{
+    --bg-0: #04001a;
+    --bg-1: #0a0024;
+    --neon-magenta: #ff2a6d;
+    --neon-cyan:    #05d9e8;
+    --neon-purple:  #9d00ff;
+    --neon-yellow:  #fffb00;
+    --neon-pink:    #ff61c7;
+    --grid-line:    rgba(157,0,255,0.18);
+    --ink:          #e9f7ff;
+  }
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body{
+    font-family: 'VT323', 'Courier New', monospace;
+    background: #000;
+    color: var(--ink);
+    overflow-x: hidden;
+    line-height: 1.4;
+    cursor: crosshair;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────
+     BACKGROUND: deep gradient + animated perspective grid + sun
+  ──────────────────────────────────────────────────────────────────── */
+  .stage{
+    position: fixed; inset: 0; z-index: -2; overflow: hidden;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 20%, rgba(157,0,255,0.25), transparent 70%),
+      radial-gradient(ellipse 100% 60% at 50% 100%, rgba(255,42,109,0.20), transparent 60%),
+      linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 50%, #1a0033 100%);
+  }
+  /* the sun */
+  .sun{
+    position: absolute; left: 50%; top: 32%;
+    transform: translate(-50%, -50%);
+    width: 420px; height: 420px; border-radius: 50%;
+    background: linear-gradient(180deg, #fffb00 0%, #ff2a6d 50%, #9d00ff 100%);
+    box-shadow:
+      0 0 60px rgba(255,42,109,0.5),
+      0 0 120px rgba(157,0,255,0.4),
+      inset 0 -30px 80px rgba(0,0,0,0.4);
+    filter: saturate(1.2);
+    opacity: 0.85;
+  }
+  .sun::after{
+    /* horizontal slats over the lower half */
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background: repeating-linear-gradient(
+      0deg, transparent 0 16px, var(--bg-1) 16px 19px
+    );
+    mask: linear-gradient(180deg, transparent 50%, #000 50%);
+    -webkit-mask: linear-gradient(180deg, transparent 50%, #000 50%);
+  }
+  /* receding perspective grid (CSS only) */
+  .grid{
+    position: absolute; left: 50%; bottom: -10vh;
+    transform: translateX(-50%);
+    width: 260vw; height: 110vh;
+    background:
+      linear-gradient(var(--grid-line) 2px, transparent 2px) 0 0 / 100% 40px,
+      linear-gradient(90deg, var(--grid-line) 2px, transparent 2px) 0 0 / 40px 100%;
+    transform-origin: 50% 0;
+    transform: translateX(-50%) perspective(700px) rotateX(70deg);
+    animation: grid-scroll 6s linear infinite;
+  }
+  @keyframes grid-scroll {
+    from { background-position: 0 0, 0 0; }
+    to   { background-position: 0 80px, 0 0; }
+  }
+  /* scanlines + slow flicker overlay */
+  .crt{
+    position: fixed; inset: 0; z-index: 50; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+    mix-blend-mode: multiply;
+    animation: flicker 2.6s infinite steps(2, end);
+  }
+  @keyframes flicker {
+    0%, 96%, 100% { opacity: 1; }
+    97% { opacity: 0.92; }
+    98% { opacity: 0.97; }
+  }
+
+  /* ────────────────────────────────────────────────────────────────────
+     HEADER + HERO
+  ──────────────────────────────────────────────────────────────────── */
+  header{
+    text-align: center;
+    padding: 64px 24px 32px;
+    position: relative;
+  }
+  .kicker{
+    display: inline-block;
+    font-family: 'Major Mono Display', monospace;
+    letter-spacing: 0.5em;
+    color: var(--neon-cyan);
+    font-size: 14px;
+    padding: 6px 14px;
+    border: 1px solid var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(5,217,232,0.6), inset 0 0 10px rgba(5,217,232,0.2);
+    text-shadow: 0 0 10px var(--neon-cyan);
+    margin-bottom: 28px;
+  }
+  h1.wordmark{
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: clamp(72px, 16vw, 220px);
+    letter-spacing: 0.08em;
+    line-height: 0.9;
+    color: #fff;
+    text-shadow:
+      0 0 8px #fff,
+      0 0 22px var(--neon-cyan),
+      0 0 44px var(--neon-magenta),
+      0 0 80px var(--neon-purple);
+    position: relative;
+    display: inline-block;
+  }
+  /* chromatic split */
+  h1.wordmark::before, h1.wordmark::after{
+    content: attr(data-text);
+    position: absolute; left: 0; top: 0; width: 100%;
+    pointer-events: none;
+  }
+  h1.wordmark::before{ color: var(--neon-magenta); transform: translate(-3px, 0); mix-blend-mode: screen; opacity: 0.85; }
+  h1.wordmark::after { color: var(--neon-cyan);    transform: translate( 3px, 0); mix-blend-mode: screen; opacity: 0.85; }
+  /* occasional glitch */
+  h1.wordmark{ animation: glitch 7s infinite; }
+  @keyframes glitch {
+    0%, 92%, 100% { transform: translateX(0); }
+    93% { transform: translate(-4px, 1px); }
+    94% { transform: translate( 5px,-1px); }
+    95% { transform: translate(-2px, 0); }
+    96% { transform: translateX(0); }
+  }
+  .subtitle{
+    margin-top: 18px;
+    font-size: clamp(18px, 2.2vw, 28px);
+    color: var(--neon-pink);
+    letter-spacing: 0.4em;
+    text-shadow: 0 0 14px var(--neon-pink);
+  }
+  .tag{
+    margin-top: 12px;
+    color: var(--neon-yellow);
+    font-size: 18px;
+    letter-spacing: 0.25em;
+    text-shadow: 0 0 10px var(--neon-yellow);
+    opacity: 0.85;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────
+     GAME CARDS GRID
+  ──────────────────────────────────────────────────────────────────── */
+  main{
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 24px 80px;
+  }
+  .section-head{
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .section-head h2{
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.4em;
+    font-size: 22px;
+    text-shadow: 0 0 12px var(--neon-cyan);
+  }
+  .section-head .bar{
+    display: block;
+    width: 120px;
+    height: 4px;
+    margin: 12px auto 0;
+    background: linear-gradient(90deg, transparent, var(--neon-magenta), var(--neon-cyan), transparent);
+    box-shadow: 0 0 14px var(--neon-magenta);
+  }
+
+  .cards{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 28px;
+  }
+  .card{
+    position: relative;
+    background: linear-gradient(180deg, rgba(15,0,40,0.85), rgba(0,0,20,0.85));
+    border: 2px solid var(--neon-purple);
+    box-shadow:
+      0 0 0 1px rgba(255,42,109,0.6),
+      0 0 22px rgba(157,0,255,0.4),
+      inset 0 0 20px rgba(157,0,255,0.15);
+    padding: 30px 28px;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    overflow: hidden;
+  }
+  .card::before{
+    /* brutalist corner notch */
+    content:""; position: absolute; top:-2px; right:-2px;
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, transparent 50%, var(--neon-magenta) 50%);
+    box-shadow: -2px 2px 12px var(--neon-magenta);
+  }
+  .card::after{
+    /* bottom-left tag mark */
+    content:""; position: absolute; bottom:-2px; left:-2px;
+    width: 14px; height: 14px;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 14px var(--neon-cyan);
+  }
+  .card:hover{
+    transform: translateY(-4px);
+    border-color: var(--neon-cyan);
+    box-shadow:
+      0 0 0 1px var(--neon-magenta),
+      0 0 30px var(--neon-cyan),
+      inset 0 0 24px rgba(5,217,232,0.18);
+  }
+  .card .badge{
+    display: inline-block;
+    font-family: 'Major Mono Display', monospace;
+    font-size: 12px;
+    color: var(--neon-yellow);
+    border: 1px solid var(--neon-yellow);
+    padding: 2px 8px;
+    letter-spacing: 0.3em;
+    margin-bottom: 14px;
+    text-shadow: 0 0 8px var(--neon-yellow);
+  }
+  .card h3{
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 44px;
+    letter-spacing: 0.08em;
+    color: #fff;
+    text-shadow:
+      0 0 8px #fff,
+      0 0 22px var(--neon-magenta),
+      0 0 40px var(--neon-purple);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .card .tagline{
+    font-family: 'Major Mono Display', monospace;
+    font-size: 13px;
+    letter-spacing: 0.35em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px var(--neon-cyan);
+    margin-bottom: 20px;
+  }
+  .card p.desc{
+    color: var(--ink);
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    line-height: 1.4;
+    margin-bottom: 24px;
+    opacity: 0.92;
+  }
+  .meta{
+    list-style: none;
+    margin-bottom: 24px;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    color: var(--neon-pink);
+    line-height: 1.55;
+  }
+  .meta li{ display: flex; gap: 10px; }
+  .meta li::before{
+    content: "▸";
+    color: var(--neon-yellow);
+    text-shadow: 0 0 6px var(--neon-yellow);
+  }
+  .play{
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    color: #000;
+    background: var(--neon-cyan);
+    padding: 14px 22px;
+    text-decoration: none;
+    box-shadow:
+      0 0 0 2px #000 inset,
+      0 0 16px var(--neon-cyan),
+      6px 6px 0 var(--neon-magenta);
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .play:hover{
+    transform: translate(-2px,-2px);
+    box-shadow:
+      0 0 0 2px #000 inset,
+      0 0 22px var(--neon-cyan),
+      10px 10px 0 var(--neon-magenta);
+  }
+  .play:active{ transform: translate(2px, 2px); box-shadow: 0 0 0 2px #000 inset, 0 0 16px var(--neon-cyan), 2px 2px 0 var(--neon-magenta); }
+
+  /* "soon" placeholder card */
+  .card.soon{
+    border-style: dashed;
+    border-color: var(--neon-pink);
+    opacity: 0.6;
+  }
+  .card.soon h3{ color: rgba(255,255,255,0.4); text-shadow: 0 0 12px var(--neon-pink); }
+  .card.soon .play{
+    background: transparent; color: var(--neon-pink);
+    box-shadow: 0 0 0 2px var(--neon-pink) inset, 0 0 16px var(--neon-pink);
+    pointer-events: none;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────
+     FOOTER
+  ──────────────────────────────────────────────────────────────────── */
+  footer{
+    text-align: center;
+    padding: 50px 20px;
+    color: rgba(255,255,255,0.45);
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    border-top: 1px solid rgba(157,0,255,0.3);
+  }
+  footer .stamp{
+    display: inline-block;
+    margin: 0 14px;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 6px var(--neon-yellow);
+  }
+  footer .runtime{
+    color: var(--neon-cyan);
+    font-family: 'Major Mono Display', monospace;
+    letter-spacing: 0.3em;
+    font-size: 13px;
+  }
+  @media (max-width: 600px){
+    header { padding: 36px 16px 18px; }
+    .sun { width: 280px; height: 280px; }
+    main { margin: 30px auto; }
+    .card { padding: 22px 20px; }
+    .card h3 { font-size: 34px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="sun"></div>
+  <div class="grid"></div>
+</div>
+<div class="crt"></div>
+
+<header>
+  <div class="kicker">EST · 2026</div>
+  <h1 class="wordmark" data-text="FEJOH">FEJOH</h1>
+  <div class="subtitle">GAMES BY FELIX</div>
+  <div class="tag">// PLAY · ARCADE · MULTIPLAYER //</div>
+</header>
+
+<main>
+  <div class="section-head">
+    <h2>·· CATALOG ··</h2>
+    <span class="bar"></span>
+  </div>
+
+  <div class="cards">
+
+    <article class="card">
+      <span class="badge">01 · ARENA</span>
+      <h3>BING BANG</h3>
+      <div class="tagline">TOP-DOWN ARENA SHOOTER</div>
+      <p class="desc">
+        Up to four players in a tight neon arena. Roll into co-op against
+        relentless waves of bots, scrap free-for-all with friends, or
+        squad-up for team deathmatch. Stack abilities between waves.
+      </p>
+      <ul class="meta">
+        <li>4-player rooms with join codes</li>
+        <li>3 modes: co-op · FFA · TDM</li>
+        <li>28 stackable upgrades</li>
+        <li>Revive teammates by running over their fall point</li>
+      </ul>
+      <a class="play" href="https://bingbang.fejoh.com">[ PLAY → ]</a>
+    </article>
+
+    <article class="card">
+      <span class="badge">02 · TACTICAL</span>
+      <h3>PEW&nbsp;PEW</h3>
+      <div class="tagline">MI-97 FIELD SIM</div>
+      <p class="desc">
+        A tactical squad shooter. Pick an operator, scout the battleground,
+        and deploy. Multiple maps, multiple loadouts, every match plays
+        different.
+      </p>
+      <ul class="meta">
+        <li>Operator-based loadouts</li>
+        <li>Multiple battleground maps</li>
+        <li>Lobby + scouting before drop</li>
+      </ul>
+      <a class="play" href="https://pewpew.fejoh.com">[ PLAY → ]</a>
+    </article>
+
+    <article class="card soon">
+      <span class="badge">?? · INCOMING</span>
+      <h3>TBA</h3>
+      <div class="tagline">SOMETHING NEW</div>
+      <p class="desc">
+        The next one is in the works. Check back soon.
+      </p>
+      <ul class="meta">
+        <li>Status: under construction</li>
+      </ul>
+      <a class="play">[ SOON ]</a>
+    </article>
+
+  </div>
+</main>
+
+<footer>
+  <div>
+    <span class="stamp">⌬ FEJOH.COM</span>
+    <span class="stamp">⌬ © FELIX</span>
+    <span class="stamp">⌬ <span id="year"></span></span>
+  </div>
+  <div class="runtime" id="runtime">runtime: 0000ms</div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const t0 = performance.now();
+  function tick(){
+    const ms = (performance.now() - t0).toFixed(0).padStart(4, '0');
+    document.getElementById('runtime').textContent = `runtime: ${ms}ms`;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+</script>
+
+</body>
+</html>
