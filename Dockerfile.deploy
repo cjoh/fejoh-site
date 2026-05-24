@@ -1,0 +1,8 @@
+FROM python:3.13-slim
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && git config --system --add safe.directory '*'
+WORKDIR /srv
+COPY deploy_listener.py /srv/deploy_listener.py
+EXPOSE 9000
+CMD ["python", "-u", "/srv/deploy_listener.py"]

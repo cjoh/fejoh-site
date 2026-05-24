@@ -1,0 +1,28 @@
+services:
+  fejoh-site:
+    image: nginx:alpine
+    container_name: fejoh-site
+    restart: unless-stopped
+    volumes:
+      - /home/cjoh/fejoh-site:/usr/share/nginx/html:ro
+    networks:
+      - twenty_default
+
+  deploy:
+    build:
+      context: .
+      dockerfile: Dockerfile.deploy
+    container_name: fejoh-site-deploy
+    restart: unless-stopped
+    environment:
+      - DEPLOY_SECRET=${DEPLOY_SECRET}
+      - REPO_DIR=/repo
+      - GIT_BRANCH=main
+    volumes:
+      - /home/cjoh/fejoh-site:/repo
+    networks:
+      - twenty_default
+
+networks:
+  twenty_default:
+    external: true

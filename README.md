@@ -1,16 +1,22 @@
 # fejoh.com
 
-Catalog site for games by Felix.
+Catalog site for games by Felix. Live at https://fejoh.com.
 
-- Live at https://fejoh.com
-- Single static page (no build step). Edit `index.html` to change content.
+## What's in here
 
-## Hosting
+- `index.html` — the whole site (single static page, no build step)
+- `docker-compose.yml` — runs nginx (serving the site) + a deploy listener
+- `Dockerfile.deploy` + `deploy_listener.py` — GitHub webhook receiver
 
-Served on a tiny `nginx:alpine` container behind Caddy on the family VPS.
+## Editing
 
-To edit the live site by hand:
+1. Edit `index.html`
+2. Commit and push to `main`
+3. GitHub fires a webhook at `https://fejoh.com/__deploy`
+4. The listener verifies the signature and runs `git pull` on the server
+5. nginx serves the new file instantly (no rebuild needed)
 
-    ssh cjoh@195.35.14.126
-    cd /home/cjoh/fejoh-site
-    # edit index.html — nginx mounts it read-from-host, no rebuild needed
+## Server
+
+Runs on `cjoh@195.35.14.126` at `/home/cjoh/fejoh-site`, behind Caddy on
+the shared `twenty_default` Docker network.
