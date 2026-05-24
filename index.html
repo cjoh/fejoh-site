@@ -21,7 +21,14 @@
 <meta name="theme-color" content="#9d00ff">
 <link rel="icon" type="image/png" href="/og.png">
 <!-- Fathom - beautiful, simple website analytics -->
-<script src="https://cdn.usefathom.com/script.js" data-site="HEUJQTIH" defer></script>
+<script src="https://cdn.usefathom.com/script.js" data-site="HEUJQTIH" data-auto="false" defer></script>
+<script>
+  window.addEventListener('load', function () {
+    if (window.fathom) {
+      fathom.trackPageview({ url: location.origin + location.pathname + '?app=fejoh' });
+    }
+  });
+</script>
 <!-- / Fathom -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
